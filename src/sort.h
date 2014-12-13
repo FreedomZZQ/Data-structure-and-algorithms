@@ -79,7 +79,57 @@ void qsort(E A[], int i, int j)
 	qsort<E>(A, k + 1, j);
 }
 
+#include<cmath>
+//Look at more values when selecting a pivot
+//选取第一个，中间和最后一个进行比较，返回中间值
+//说明参见课本P250第二段
+template<typename E>
+inline E min(E a, E b){
+	return a < b ? a : b;
+}
 
+template<typename E>
+inline int findpivot_2(E A[], int i, int j){
+	int mid = (i + j) / 2;
+	int res[3] = { 0, 0, 0 };
+	int temp = (A[i] + A[j] + A[mid]) / 3;
+
+	res[0] = abs(A[i] - temp);
+	res[1] = abs(A[mid] - temp);
+	res[2] = abs(A[j] - temp);
+	temp = min(res[0], min(res[1], res[2]));
+
+	if (res[0] == temp) return i;
+	else if (res[1] == temp) return mid;
+	else if (res[2] == temp) return j;
+
+}
+
+template<typename E>
+inline int partition_2(E A[], int i, int j, E &pivot)
+{
+	do{
+		while (z_comp<E>(pivot, A[++i]));
+		while ((i < j) && z_comp<E>(A[--j], pivot));
+		z_swap<E>(A, i, j);
+
+	} while (i < j);
+	return i;
+}
+
+template<typename E>
+void qsort_2(E A[], int i, int j)
+{
+	if (j <= i) return;
+	int pivotindex = findpivot(A, i, j);
+	z_swap<E>(A, j, pivotindex);
+
+	int k = partition(A, i - 1, j, A[j]);
+	z_swap<E>(A, j, k);
+
+	qsort<E>(A, i, k - 1);
+	qsort<E>(A, k + 1, j);
+}
 
 
 
