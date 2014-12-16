@@ -4,6 +4,14 @@
 #include "help.h"
 
 template<typename E>
+void inssort(E A[], int n)
+{
+	for (int i = 1; i < n;i++)
+	for (int j = i; (j > 0) && (z_comp(A[j - 1], A[j])); j--)
+		z_swap(A, j, j - 1);
+}
+
+template<typename E>
 void bubsort(E A[], int n)
 {
 	for (int i = 0; i < n - 1; i++){
@@ -79,10 +87,19 @@ void qsort(E A[], int i, int j)
 	qsort<E>(A, k + 1, j);
 }
 
+//改良qsort
 #include<cmath>
-//Look at more values when selecting a pivot
+#define THRESHOLD 5 //短于此值的子序列不再递归，使用插入排序完成
+template<typename E>
+void inssort_2(E A[], int m, int n)
+{
+	for (int i = m; i <= n; i++)
+	for (int j = i; (j > 0) && (z_comp<E>(A[j - 1], A[j])); j--)
+		z_swap<E>(A, j, j - 1);
+}
+
+//1.Look at more values when selecting a pivot
 //选取第一个，中间和最后一个进行比较，返回中间值
-//说明参见课本P250第二段
 template<typename E>
 inline E min(E a, E b){
 	return a < b ? a : b;
@@ -117,35 +134,96 @@ inline int partition_2(E A[], int i, int j, E &pivot)
 	return i;
 }
 
+//2.子段长度小于定值时使用插入排序代替递归
 template<typename E>
 void qsort_2(E A[], int i, int j)
 {
 	if (j <= i) return;
-	int pivotindex = findpivot(A, i, j);
+	int pivotindex = findpivot_2(A, i, j);
 	z_swap<E>(A, j, pivotindex);
 
-	int k = partition(A, i - 1, j, A[j]);
+	int k = partition_2(A, i - 1, j, A[j]);
 	z_swap<E>(A, j, k);
 
-	qsort<E>(A, i, k - 1);
-	qsort<E>(A, k + 1, j);
+	if (j - i > THRESHOLD){
+		qsort<E>(A, i, k - 1);
+		qsort<E>(A, k + 1, j);
+	}
+	else{
+		inssort_2<E>(A, i, k - 1);
+		inssort_2<E>(A, k + 1, j);
+	}
 }
 
+//3.使用stack代替递归
+#include<stack>
+struct node{
+	int i, j;
+};
+template<typename E>
+void qsort_3(E A[], int i, int j)
+{
+	stack<node> s;
+	node n;
+	n.i = i, n.j = j;
+	s.push(n);
+	while (s.size() > 0){
+		i = s.top().i, j = s.top().j;
+		s.pop();
+		
+		int pivotindex = findpivot_2(A, i, j);
+		z_swap<E>(A, j, pivotindex);
 
+		int k = partition_2(A, i - 1, j, A[j]);
+		z_swap<E>(A, j, k);
 
+		if (i < k - 1) {
+			n.i = i, n.j = k - 1;
+			s.push(n);
+		}
+		if (k + 1 < j) {
+			n.i = k + 1, n.j = j;
+			s.push(n);
+		}
 
+	}
+}
 
+//2+3的组合
+template<typename E>
+void qsort_4(E A[], int i, int j)
+{
+	stack<node> s;
+	node n;
+	int x = i, y = j;
+	n.i = x, n.j = y;
+	s.push(n);
+	while (s.size() > 0){
+		x = s.top().i, y = s.top().j;
+		s.pop();
 
+		int pivotindex = findpivot_2(A, x, y);
+		z_swap<E>(A, y, pivotindex);
 
+		int k = partition_2(A, x - 1, y, A[y]);
+		z_swap<E>(A, y, k);
 
+		if (y - x > THRESHOLD){
+			if (x < k - 1) {
+				n.i = x, n.j = k - 1;
+				s.push(n);
+			}
+			if (k + 1 < y) {
+				n.i = k + 1, n.j = y;
+				s.push(n);
+			}
 
-
-
-
-
-
-
-
-
+		}
+		else{
+			inssort_2<E>(A, i, j);
+			break;
+		}
+	}
+}
 
 #endif
