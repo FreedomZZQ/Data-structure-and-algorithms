@@ -5,11 +5,19 @@ public class Test {
 		int r = a.length - 1;
 		while(l <=  r){
 			int mid = (l + r) / 2;
-			if(key < a[mid]) r = mid - 1;
-			else if(key > a[mid]) l = mid + 1;
-			else return mid;
+			if		(key < a[mid])	r = mid - 1;
+			else if	(key > a[mid])	l = mid + 1;
+			else 					return mid;
 		}
-		return -1;
+		return -1; 
+	}
+	public static int binarySearch2(int key, int[] a, int l, int r){
+		if(l >= r) return -1;
+		int mid = (l + r) / 2;
+		
+		if		(key < a[mid])	return binarySearch2(key, a, l, mid - 1);
+		else if	(key > a[mid])	return binarySearch2(key, a, mid + 1, r);
+		else 					return mid;
 	}
 	public static int gcd(int p, int q){
 		System.out.println(p + " " + q);
